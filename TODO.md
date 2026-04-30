@@ -6,44 +6,43 @@
 - [x] Create .gitignore file
 
 ## Backend (Node.js/Express + MongoDB)
-- [x] Initialize Node.js project with package.json
-- [x] Set up Express server with basic config
-- [x] Connect to MongoDB
+- [ ] Initialize Node.js project with package.json
+- [ ] Set up Express server with basic config
+- [ ] Connect to MongoDB
 
 ## API Endpoints
 
 ### Authentication
-- [x] POST /api/auth/register - User registration
-- [x] POST /api/auth/login - User login (JWT)
-- [x] GET /api/auth/profile - Get current user
+- [ ] POST /api/auth/register - User registration
+- [ ] POST /api/auth/login - User login (JWT)
+- [ ] GET /api/auth/profile - Get current user
 
 ### Products
-- [x] GET /api/products - List all products
-- [x] GET /api/products/:id - Get product details
-- [x] POST /api/products - Create product (admin)
-- [x] PUT /api/products/:id - Update product (admin)
-- [x] DELETE /api/products/:id - Delete product (admin)
+- [ ] GET /api/products - List all products
+- [ ] GET /api/products/:id - Get product details
+- [ ] POST /api/products - Create product (admin)
+- [ ] PUT /api/products/:id - Update product (admin)
+- [ ] DELETE /api/products/:id - Delete product (admin)
 
 ### Categories
-- [x] GET /api/categories - List categories
-- [x] POST /api/categories - Create category (admin)
+- [ ] GET /api/categories - List categories
+- [ ] POST /api/categories - Create category (admin)
 
 ### Cart
-- [x] GET /api/cart - Get user's cart
-- [x] POST /api/cart - Add item to cart
-- [x] PUT /api/cart - Update cart item quantity
-- [x] DELETE /api/cart/:itemId - Remove item from cart
-- [x] DELETE /api/cart - Clear cart
+- [ ] GET /api/cart - Get user's cart
+- [ ] POST /api/cart - Add item to cart
+- [ ] PUT /api/cart - Update cart item quantity
+- [ ] DELETE /api/cart/:itemId - Remove item from cart
+- [ ] DELETE /api/cart - Clear cart
 
 ### Orders
-- [x] POST /api/orders - Create order
-- [x] GET /api/orders - Get user's orders
-- [x] GET /api/orders/:id - Get order details
-- [x] POST /api/orders/verify - Verify payment
+- [ ] POST /api/orders - Create order
+- [ ] GET /api/orders - Get user's orders
+- [ ] GET /api/orders/:id - Get order details
 
 ### Reviews
-- [x] POST /api/products/:id/reviews - Add review
-- [x] GET /api/products/:id/reviews - Get product reviews
+- [ ] POST /api/products/:id/reviews - Add review
+- [ ] GET /api/products/:id/reviews - Get product reviews
 
 ## Frontend (React - Placeholder)
-- [x] Set up React project structure (dummy/placeholder)
+- [ ] Set up React project structure (dummy/placeholder)
