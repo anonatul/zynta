@@ -16,7 +16,7 @@ const createOrder = async (req, res) => {
     const cart = cartResult.rows[0];
 
     const itemsResult = await client.query(
-      `SELECT ci.*, p.title, p.price, p.stock, p.active, p.seller_id
+      `SELECT ci.*, p.title, p.price, p.stock_quantity, p.status, p.seller_id
        FROM cart_items ci
        JOIN products p ON ci.product_id = p.id
        WHERE ci.cart_id = $1`,
@@ -28,25 +28,25 @@ const createOrder = async (req, res) => {
     }
 
     for (const item of itemsResult.rows) {
-      if (!item.active) {
+      if (item.status !== 'active') {
         await client.query('ROLLBACK');
         return res.status(400).json({ message: `Product "${item.title}" is not active` });
       }
-      if (item.stock < item.quantity) {
+      if (item.stock_quantity < item.quantity) {
         await client.query('ROLLBACK');
         return res.status(400).json({ message: `Insufficient stock for "${item.title}"` });
       }
     }
 
     const lockedProducts = await client.query(
-      `SELECT p.id, p.stock FROM products p
+      `SELECT p.id, p.stock_quantity FROM products p
        JOIN cart_items ci ON ci.product_id = p.id
        WHERE ci.cart_id = $1 FOR UPDATE`,
       [cart.id]
     );
     for (const locked of lockedProducts.rows) {
       const cartItem = itemsResult.rows.find(i => i.product_id === locked.id);
-      if (cartItem && locked.stock < cartItem.quantity) {
+      if (cartItem && locked.stock_quantity < cartItem.quantity) {
         await client.query('ROLLBACK');
         return res.status(400).json({ message: `Insufficient stock for "${cartItem.title}"` });
       }
@@ -82,7 +82,7 @@ const createOrder = async (req, res) => {
         [order.id, item.product_id, item.quantity, item.price]
       );
       await client.query(
-        'UPDATE products SET stock = stock - $1 WHERE id = $2',
+        'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
         [item.quantity, item.product_id]
       );
     }
@@ -103,7 +103,7 @@ const createOrder = async (req, res) => {
 const getOrders = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.zip, a.country
+      `SELECT o.*, a.name as address_name, a.street, a.city, a.state, a.zip
        FROM orders o
        LEFT JOIN addresses a ON o.shipping_address_id = a.id
        WHERE o.user_id = $1
@@ -121,7 +121,7 @@ const getOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const orderResult = await pool.query(
-      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.zip, a.country
+      `SELECT o.*, a.name as address_name, a.street, a.city, a.state, a.zip
        FROM orders o
        LEFT JOIN addresses a ON o.shipping_address_id = a.id
        WHERE o.id = $1 AND o.user_id = $2`,

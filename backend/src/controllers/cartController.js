@@ -14,7 +14,7 @@ const getCart = async (req, res) => {
     const cart = cartResult.rows[0];
 
     const itemsResult = await pool.query(
-      `SELECT ci.*, p.title, p.price, p.image_url, p.stock, p.active, p.seller_id
+      `SELECT ci.*, p.title, p.price, p.image_url, p.stock_quantity, p.status, p.seller_id
        FROM cart_items ci
        JOIN products p ON ci.product_id = p.id
        WHERE ci.cart_id = $1`,
@@ -43,10 +43,10 @@ const addToCart = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
     const product = productResult.rows[0];
-    if (!product.active) {
+    if (product.status !== 'active') {
       return res.status(400).json({ message: 'Product is not active' });
     }
-    if (product.stock < quantity) {
+    if (product.stock_quantity < quantity) {
       return res.status(400).json({ message: 'Insufficient stock' });
     }
 
@@ -73,7 +73,7 @@ const addToCart = async (req, res) => {
 
     if (existingItem.rows.length > 0) {
       const newQuantity = existingItem.rows[0].quantity + quantity;
-      if (newQuantity > product.stock) {
+      if (newQuantity > product.stock_quantity) {
         return res.status(400).json({ message: 'Insufficient stock' });
       }
       const updateResult = await pool.query(
@@ -103,7 +103,7 @@ const updateCartItem = async (req, res) => {
     }
 
     const itemResult = await pool.query(
-      `SELECT ci.*, p.stock, p.active FROM cart_items ci
+      `SELECT ci.*, p.stock_quantity, p.status FROM cart_items ci
        JOIN products p ON ci.product_id = p.id
        JOIN carts c ON ci.cart_id = c.id
        WHERE ci.id = $1 AND c.user_id = $2`,
@@ -113,10 +113,10 @@ const updateCartItem = async (req, res) => {
       return res.status(404).json({ message: 'Cart item not found' });
     }
     const item = itemResult.rows[0];
-    if (!item.active) {
+    if (item.status !== 'active') {
       return res.status(400).json({ message: 'Product is not active' });
     }
-    if (item.stock < quantity) {
+    if (item.stock_quantity < quantity) {
       return res.status(400).json({ message: 'Insufficient stock' });
     }
 

@@ -5,8 +5,8 @@ const getPublicProducts = async (req, res) => {
     const { page = 1, limit = 10, search, category_id } = req.query;
     const offset = (page - 1) * limit;
     const params = [];
-    let conditions = ['active = $1'];
-    params.push(true);
+    let conditions = ['status = $1'];
+    params.push('active');
 
     if (search) {
       conditions.push(`title ILIKE $${params.length + 1}`);
@@ -48,8 +48,8 @@ const getPublicProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const result = await query(
-      'SELECT * FROM products WHERE id = $1 AND active = $2',
-      [id, true]
+      'SELECT * FROM products WHERE id = $1 AND status = $2',
+      [id, 'active']
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Product not found' });
