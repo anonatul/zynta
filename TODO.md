@@ -45,11 +45,11 @@
 - [x] POST /api/products/:id/reviews - Add review
 - [x] GET /api/products/:id/reviews - Get product reviews
 
-### Addresses (In Progress)
-- [ ] GET /api/addresses - Get user addresses
-- [ ] POST /api/addresses - Add address
-- [ ] PUT /api/addresses/:id - Update address
-- [ ] DELETE /api/addresses/:id - Delete address
+### Addresses
+- [x] GET /api/addresses - Get user addresses
+- [x] POST /api/addresses - Add address
+- [x] PUT /api/addresses/:id - Update address
+- [x] DELETE /api/addresses/:id - Delete address
 
 ## Frontend (React - Placeholder)
 - [ ] Set up React project structure (dummy/placeholder)
