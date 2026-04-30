@@ -1,13 +1,12 @@
 const express = require('express');
 const router = express.Router();
 
-const notImplemented = (req, res) => {
-  res.status(501).json({ message: 'Address endpoints require PostgreSQL controller implementation' });
-};
+const { authenticateToken } = require('../middleware/auth');
+const { getAddresses, createAddress, updateAddress, deleteAddress } = require('../controllers/addressController');
 
-router.get('/', notImplemented);
-router.post('/', notImplemented);
-router.put('/:id', notImplemented);
-router.delete('/:id', notImplemented);
+router.get('/', authenticateToken, getAddresses);
+router.post('/', authenticateToken, createAddress);
+router.put('/:id', authenticateToken, updateAddress);
+router.delete('/:id', authenticateToken, deleteAddress);
 
 module.exports = router;

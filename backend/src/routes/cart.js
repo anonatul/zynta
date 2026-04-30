@@ -1,14 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-const notImplemented = (req, res) => {
-  res.status(501).json({ message: 'Cart endpoints require PostgreSQL controller implementation' });
-};
+const { authenticateToken } = require('../middleware/auth');
+const { getCart, addToCart, updateCartItem, removeCartItem, clearCart } = require('../controllers/cartController');
 
-router.get('/', notImplemented);
-router.post('/', notImplemented);
-router.put('/:itemId', notImplemented);
-router.delete('/:itemId', notImplemented);
-router.delete('/', notImplemented);
+router.get('/', authenticateToken, getCart);
+router.post('/', authenticateToken, addToCart);
+router.put('/:itemId', authenticateToken, updateCartItem);
+router.delete('/:itemId', authenticateToken, removeCartItem);
+router.delete('/', authenticateToken, clearCart);
 
 module.exports = router;

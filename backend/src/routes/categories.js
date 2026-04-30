@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
 
-const notImplemented = (req, res) => {
-  res.status(501).json({ message: 'Category endpoints require PostgreSQL controller implementation' });
-};
+const { authenticateToken, authorizeRoles } = require('../middleware/auth');
+const { getCategories, createCategory } = require('../controllers/categoryController');
 
-router.get('/', notImplemented);
-router.post('/', notImplemented);
+router.get('/', getCategories);
+router.post('/', authenticateToken, authorizeRoles('admin'), createCategory);
 
 module.exports = router;

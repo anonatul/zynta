@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const notImplemented = (req, res) => {
-  res.status(501).json({ message: 'Order endpoints require PostgreSQL controller implementation' });
-};
+const { authenticateToken } = require('../middleware/auth');
+const { createOrder, getOrders, getOrder } = require('../controllers/orderController');
 
-router.post('/', notImplemented);
-router.get('/', notImplemented);
-router.get('/:id', notImplemented);
+router.post('/', authenticateToken, createOrder);
+router.get('/', authenticateToken, getOrders);
+router.get('/:id', authenticateToken, getOrder);
 
 module.exports = router;
