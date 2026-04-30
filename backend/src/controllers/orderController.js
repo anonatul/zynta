@@ -66,10 +66,12 @@ const createOrder = async (req, res) => {
       }
     }
 
+    const orderNumber = `ZY${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    
     const orderResult = await client.query(
-      `INSERT INTO orders (user_id, total_amount, status, shipping_address_id)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [req.user.id, totalAmount, 'pending', addressId || null]
+      `INSERT INTO orders (user_id, order_number, total_amount, status, shipping_address_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [req.user.id, orderNumber, totalAmount, 'pending', addressId || null]
     );
     const order = orderResult.rows[0];
 
@@ -101,7 +103,7 @@ const createOrder = async (req, res) => {
 const getOrders = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.postal_code, a.country
+      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.zip, a.country
        FROM orders o
        LEFT JOIN addresses a ON o.shipping_address_id = a.id
        WHERE o.user_id = $1
@@ -119,7 +121,7 @@ const getOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const orderResult = await pool.query(
-      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.postal_code, a.country
+      `SELECT o.*, a.label as address_label, a.street, a.city, a.state, a.zip, a.country
        FROM orders o
        LEFT JOIN addresses a ON o.shipping_address_id = a.id
        WHERE o.id = $1 AND o.user_id = $2`,

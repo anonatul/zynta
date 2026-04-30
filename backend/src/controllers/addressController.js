@@ -15,9 +15,9 @@ const getAddresses = async (req, res) => {
 
 const createAddress = async (req, res) => {
   try {
-    const { label, street, city, state, postal_code, country, is_default } = req.body;
-    if (!street || !city || !state || !postal_code || !country) {
-      return res.status(400).json({ message: 'Street, city, state, postal_code, and country are required' });
+    const { label, street, city, state, zip, country, is_default } = req.body;
+    if (!street || !city || !state || !zip || !country) {
+      return res.status(400).json({ message: 'Street, city, state, zip, and country are required' });
     }
 
     if (is_default) {
@@ -28,9 +28,9 @@ const createAddress = async (req, res) => {
     }
 
     const result = await query(
-      `INSERT INTO addresses (user_id, label, street, city, state, postal_code, country, is_default)
+      `INSERT INTO addresses (user_id, label, street, city, state, zip, country, is_default)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [req.user.id, label || null, street, city, state, postal_code, country, is_default || false]
+      [req.user.id, label || null, street, city, state, zip, country, is_default || false]
     );
     res.status(201).json({ address: result.rows[0] });
   } catch (error) {
@@ -42,7 +42,7 @@ const createAddress = async (req, res) => {
 const updateAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const { label, street, city, state, postal_code, country, is_default } = req.body;
+    const { label, street, city, state, zip, country, is_default } = req.body;
 
     const existing = await query(
       'SELECT * FROM addresses WHERE id = $1 AND user_id = $2',
@@ -65,11 +65,11 @@ const updateAddress = async (req, res) => {
         street = COALESCE($2, street),
         city = COALESCE($3, city),
         state = COALESCE($4, state),
-        postal_code = COALESCE($5, postal_code),
+        zip = COALESCE($5, zip),
         country = COALESCE($6, country),
         is_default = COALESCE($7, is_default)
        WHERE id = $8 AND user_id = $9 RETURNING *`,
-      [label, street, city, state, postal_code, country, is_default, id, req.user.id]
+      [label, street, city, state, zip, country, is_default, id, req.user.id]
     );
     res.json({ address: result.rows[0] });
   } catch (error) {
