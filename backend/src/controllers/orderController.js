@@ -56,30 +56,43 @@ const createOrder = async (req, res) => {
     const { shipping_address_id } = req.body;
 
     let addressId = shipping_address_id;
+    let addressText = null;
     if (!addressId) {
       const defaultAddress = await client.query(
-        'SELECT id FROM addresses WHERE user_id = $1 AND is_default = true LIMIT 1',
+        'SELECT id, street, city, state, zip FROM addresses WHERE user_id = $1 AND is_default = true LIMIT 1',
         [req.user.id]
       );
       if (defaultAddress.rows.length > 0) {
-        addressId = defaultAddress.rows[0].id;
+        const addr = defaultAddress.rows[0];
+        addressId = addr.id;
+        addressText = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`;
+      }
+    } else {
+      const addrResult = await client.query(
+        'SELECT street, city, state, zip FROM addresses WHERE id = $1 AND user_id = $2',
+        [addressId, req.user.id]
+      );
+      if (addrResult.rows.length > 0) {
+        const addr = addrResult.rows[0];
+        addressText = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`;
       }
     }
 
     const orderNumber = `ZY${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
     const orderResult = await client.query(
-      `INSERT INTO orders (user_id, order_number, total_amount, status, shipping_address_id)
+      `INSERT INTO orders (user_id, order_number, total_amount, status, shipping_address)
        VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [req.user.id, orderNumber, totalAmount, 'pending', addressId || null]
+      [req.user.id, orderNumber, totalAmount, 'pending', addressText]
     );
     const order = orderResult.rows[0];
 
     for (const item of itemsResult.rows) {
+      const subtotal = item.price * item.quantity;
       await client.query(
-        `INSERT INTO order_items (order_id, product_id, quantity, price)
-         VALUES ($1, $2, $3, $4)`,
-        [order.id, item.product_id, item.quantity, item.price]
+        `INSERT INTO order_items (order_id, product_id, seller_id, title, quantity, price, subtotal)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [order.id, item.product_id, item.seller_id, item.title, item.quantity, item.price, subtotal]
       );
       await client.query(
         'UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2',
@@ -103,11 +116,7 @@ const createOrder = async (req, res) => {
 const getOrders = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT o.*, a.name as address_name, a.street, a.city, a.state, a.zip
-       FROM orders o
-       LEFT JOIN addresses a ON o.shipping_address_id = a.id
-       WHERE o.user_id = $1
-       ORDER BY o.created_at DESC`,
+      'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
       [req.user.id]
     );
     res.json({ orders: result.rows });
@@ -121,10 +130,7 @@ const getOrder = async (req, res) => {
   try {
     const { id } = req.params;
     const orderResult = await pool.query(
-      `SELECT o.*, a.name as address_name, a.street, a.city, a.state, a.zip
-       FROM orders o
-       LEFT JOIN addresses a ON o.shipping_address_id = a.id
-       WHERE o.id = $1 AND o.user_id = $2`,
+      'SELECT * FROM orders WHERE id = $1 AND user_id = $2',
       [id, req.user.id]
     );
     if (orderResult.rows.length === 0) {
@@ -132,10 +138,7 @@ const getOrder = async (req, res) => {
     }
 
     const itemsResult = await pool.query(
-      `SELECT oi.*, p.title, p.image_url
-       FROM order_items oi
-       JOIN products p ON oi.product_id = p.id
-       WHERE oi.order_id = $1`,
+      'SELECT * FROM order_items WHERE order_id = $1',
       [id]
     );
 
