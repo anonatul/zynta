@@ -1,12 +1,11 @@
 const express = require('express');
 const router = express.Router();
 
-const notImplemented = (req, res) => {
-  res.status(501).json({ message: 'Auth endpoints require PostgreSQL controller implementation' });
-};
+const { register, login, getProfile } = require('../controllers/authController');
+const { authenticateToken } = require('../middleware/auth');
 
-router.post('/register', notImplemented);
-router.post('/login', notImplemented);
-router.get('/profile', notImplemented);
+router.post('/register', register);
+router.post('/login', login);
+router.get('/profile', authenticateToken, getProfile);
 
 module.exports = router;
