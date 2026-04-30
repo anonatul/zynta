@@ -53,4 +53,16 @@ export const addressesAPI = {
   delete: (id) => api.delete(`/addresses/${id}`),
 };
 
+export const sellerAPI = {
+  getProducts: () => api.get('/seller/products'),
+  createProduct: (data) => api.post('/seller/products', data),
+  updateProduct: (id, data) => api.put(`/seller/products/${id}`, data),
+  deleteProduct: (id) => api.delete(`/seller/products/${id}`),
+};
+
+export const adminAPI = {
+  getSellers: () => api.get('/admin/sellers'),
+  updateSeller: (id, data) => api.put(`/admin/sellers/${id}`, data),
+};
+
 export default api;

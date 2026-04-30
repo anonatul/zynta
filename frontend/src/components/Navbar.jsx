@@ -28,8 +28,10 @@ function Navbar() {
         <Link to="/cart" style={{ color: 'white', textDecoration: 'none' }}>Cart</Link>
         {user ? (
           <>
-            <Link to="/orders" style={{ color: 'white', textDecoration: 'none' }}>Orders</Link>
-            <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>{user.name}</Link>
+            {user.role === 'seller' && <Link to="/seller/dashboard" style={{ color: 'white', textDecoration: 'none' }}>Seller Dashboard</Link>}
+            {user.role === 'admin' && <Link to="/admin/dashboard" style={{ color: 'white', textDecoration: 'none' }}>Admin Dashboard</Link>}
+            {user.role === 'customer' && <Link to="/orders" style={{ color: 'white', textDecoration: 'none' }}>Orders</Link>}
+            {user.role === 'customer' && <Link to="/profile" style={{ color: 'white', textDecoration: 'none' }}>{user.name}</Link>}
             <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: 'white', cursor: 'pointer' }}>Logout</button>
           </>
         ) : (
