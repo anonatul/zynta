@@ -30,6 +30,7 @@ docs/
 # Local files
 TODO.md
 .superpowers/
+.worktrees
 .worktrees/
 
 # Testing
