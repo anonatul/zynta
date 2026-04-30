@@ -27,6 +27,9 @@ Thumbs.db
 # Docs (keep locally)
 docs/
 
+# Local files
+TODO.md
+
 # Testing
 coverage/
 
