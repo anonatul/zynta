@@ -8,6 +8,5 @@ const notImplemented = (req, res) => {
 router.post('/', notImplemented);
 router.get('/', notImplemented);
 router.get('/:id', notImplemented);
-router.post('/verify', notImplemented);
 
 module.exports = router;

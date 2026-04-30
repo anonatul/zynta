@@ -6,5 +6,4 @@ module.exports = {
   createOrder: notImplemented,
   getOrders: notImplemented,
   getOrder: notImplemented,
-  verifyPayment: notImplemented,
 };
