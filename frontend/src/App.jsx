@@ -26,6 +26,16 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/seller/dashboard" element={<SellerDashboard />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="*" element={
+          <div className="container" style={{ paddingTop: '4rem', textAlign: 'center' }}>
+            <div className="empty-state">
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.4 }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              <h2>Page Not Found</h2>
+              <p className="text-muted">The page you're looking for doesn't exist.</p>
+              <a href="/" className="btn btn-primary" style={{ marginTop: '1rem' }}>Go Home</a>
+            </div>
+          </div>
+        } />
       </Routes>
     </BrowserRouter>
   )

@@ -84,8 +84,8 @@ const addToCart = async (req, res) => {
     }
 
     const itemResult = await pool.query(
-      'INSERT INTO cart_items (cart_id, product_id, quantity) VALUES ($1, $2, $3) RETURNING *',
-      [cart.id, product_id, quantity]
+      'INSERT INTO cart_items (cart_id, product_id, quantity, price) VALUES ($1, $2, $3, $4) RETURNING *',
+      [cart.id, product_id, quantity, product.price]
     );
     res.status(201).json({ cartItem: itemResult.rows[0] });
   } catch (error) {

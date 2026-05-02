@@ -105,6 +105,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity integer NOT NULL CHECK (quantity > 0),
   price numeric(10,2) NOT NULL CHECK (price >= 0),
   subtotal numeric(10,2) NOT NULL CHECK (subtotal >= 0),
+  status varchar(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'shipped', 'delivered', 'cancelled')),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );

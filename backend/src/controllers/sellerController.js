@@ -3,10 +3,12 @@ const { query } = require('../config/db');
 const getSellerProducts = async (req, res) => {
   try {
     const result = await query(
-      `SELECT * FROM products WHERE seller_id = $1 ORDER BY created_at DESC`,
+      `SELECT p.*, c.name as category FROM products p
+       LEFT JOIN categories c ON p.category_id = c.id
+       WHERE p.seller_id = $1 ORDER BY p.created_at DESC`,
       [req.user.id]
     );
-    res.json({ products: result.rows });
+    res.json(result.rows);
   } catch (error) {
     console.error('GetSellerProducts error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -20,10 +22,10 @@ const createSellerProduct = async (req, res) => {
       return res.status(400).json({ message: 'Title and price are required' });
     }
     const result = await query(
-      `INSERT INTO products (seller_id, title, description, price, category_id, stock_quantity, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO products (seller_id, title, description, price, category_id, stock_quantity, image_url, status)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
        RETURNING *`,
-      [req.user.id, title, description, price, category_id, stock_quantity || 0, image_url]
+      [req.user.id, title, description, price, category_id, stock_quantity || 0, image_url, 'active']
     );
     res.status(201).json({ product: result.rows[0] });
   } catch (error) {
