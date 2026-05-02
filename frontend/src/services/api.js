@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-});
+const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api' });
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
@@ -58,11 +56,14 @@ export const sellerAPI = {
   createProduct: (data) => api.post('/seller/products', data),
   updateProduct: (id, data) => api.put(`/seller/products/${id}`, data),
   deleteProduct: (id) => api.delete(`/seller/products/${id}`),
+  getOrders: () => api.get('/seller/orders'),
+  updateOrderStatus: (itemId, data) => api.patch(`/seller/orders/${itemId}`, data),
 };
 
 export const adminAPI = {
   getSellers: () => api.get('/admin/sellers'),
-  updateSeller: (id, data) => api.put(`/admin/sellers/${id}`, data),
+  approveSeller: (id) => api.put(`/admin/sellers/${id}/approve`),
+  rejectSeller: (id) => api.put(`/admin/sellers/${id}/reject`),
 };
 
 export default api;
