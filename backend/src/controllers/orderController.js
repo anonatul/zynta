@@ -57,6 +57,7 @@ const createOrder = async (req, res) => {
 
     let addressId = shipping_address_id;
     let addressText = null;
+    
     if (!addressId) {
       const defaultAddress = await client.query(
         'SELECT id, street, city, state, zip FROM addresses WHERE user_id = $1 AND is_default = true LIMIT 1',
@@ -66,6 +67,16 @@ const createOrder = async (req, res) => {
         const addr = defaultAddress.rows[0];
         addressId = addr.id;
         addressText = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`;
+      } else {
+        const anyAddress = await client.query(
+          'SELECT id, street, city, state, zip FROM addresses WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+          [req.user.id]
+        );
+        if (anyAddress.rows.length > 0) {
+          const addr = anyAddress.rows[0];
+          addressId = addr.id;
+          addressText = `${addr.street}, ${addr.city}, ${addr.state} ${addr.zip}`;
+        }
       }
     } else {
       const addrResult = await client.query(
@@ -78,12 +89,17 @@ const createOrder = async (req, res) => {
       }
     }
 
+    if (!addressText) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ message: 'No shipping address found. Please add a shipping address in your profile.' });
+    }
+
     const orderNumber = `ZY${Date.now()}${Math.floor(Math.random() * 1000)}`;
     
     const orderResult = await client.query(
-      `INSERT INTO orders (user_id, order_number, total_amount, status, shipping_address)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [req.user.id, orderNumber, totalAmount, 'pending', addressText]
+      `INSERT INTO orders (user_id, order_number, total_amount, status, payment_status, shipping_address)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [req.user.id, orderNumber, totalAmount, 'pending', 'pending', addressText]
     );
     const order = orderResult.rows[0];
 
@@ -115,11 +131,32 @@ const createOrder = async (req, res) => {
 
 const getOrders = async (req, res) => {
   try {
-    const result = await pool.query(
+    const ordersResult = await pool.query(
       'SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC',
       [req.user.id]
     );
-    res.json({ orders: result.rows });
+
+    // Fetch items for all orders
+    const orders = [];
+    for (const order of ordersResult.rows) {
+      const itemsResult = await pool.query(
+        'SELECT * FROM order_items WHERE order_id = $1',
+        [order.id]
+      );
+      // Derive effective status from items
+      const items = itemsResult.rows;
+      let effectiveStatus = order.status;
+      if (items.length > 0) {
+        const statuses = items.map(i => i.status);
+        if (statuses.every(s => s === 'delivered')) effectiveStatus = 'delivered';
+        else if (statuses.every(s => s === 'cancelled')) effectiveStatus = 'cancelled';
+        else if (statuses.some(s => s === 'shipped')) effectiveStatus = 'shipped';
+        else if (statuses.some(s => s === 'processing')) effectiveStatus = 'processing';
+      }
+      orders.push({ ...order, status: effectiveStatus, items });
+    }
+
+    res.json({ orders });
   } catch (error) {
     console.error('GetOrders error:', error);
     res.status(500).json({ message: 'Server error' });
@@ -149,4 +186,49 @@ const getOrder = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, getOrders, getOrder };
+const getSellerOrders = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT o.id, o.order_number, o.total_amount, o.status, o.payment_status, o.shipping_address, o.created_at,
+              oi.id as item_id, oi.product_id, oi.title, oi.quantity, oi.price, oi.subtotal, oi.status as item_status,
+              u.name as customer_name, u.email as customer_email
+       FROM orders o
+       JOIN order_items oi ON oi.order_id = o.id
+       JOIN users u ON u.id = o.user_id
+       WHERE oi.seller_id = $1
+       ORDER BY o.created_at DESC`,
+      [req.user.id]
+    );
+    res.json({ orders: result.rows });
+  } catch (error) {
+    console.error('GetSellerOrders error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+const updateSellerOrderItem = async (req, res) => {
+  try {
+    const { itemId } = req.params;
+    const { status } = req.body;
+    if (!status || !['processing', 'shipped', 'delivered', 'cancelled'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status. Use: processing, shipped, delivered, or cancelled' });
+    }
+
+    const result = await pool.query(
+      `UPDATE order_items 
+       SET status = $1, updated_at = now()
+       WHERE id = $2 AND seller_id = $3
+       RETURNING *`,
+      [status, itemId, req.user.id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Order item not found or already updated' });
+    }
+    res.json({ item: result.rows[0] });
+  } catch (error) {
+    console.error('UpdateSellerOrderItem error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { createOrder, getOrders, getOrder, getSellerOrders, updateSellerOrderItem };

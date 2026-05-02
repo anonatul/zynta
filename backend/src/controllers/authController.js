@@ -33,7 +33,7 @@ const register = async (req, res) => {
 
     if (role === 'seller') {
       await query(
-        'INSERT INTO seller_profiles (user_id, status) VALUES ($1, $2)',
+        'INSERT INTO seller_profiles (user_id, approval_status) VALUES ($1, $2)',
         [user.id, 'pending']
       );
       user.status = 'pending';
@@ -77,11 +77,14 @@ const login = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const sellerStatus = user.role === 'seller' ? await query(
-      'SELECT status FROM seller_profiles WHERE user_id = $1',
-      [user.id]
-    ) : null;
-    const status = sellerStatus?.rows[0]?.status || user.status || null;
+    let status = null;
+    if (user.role === 'seller') {
+      const sellerStatus = await query(
+        'SELECT approval_status FROM seller_profiles WHERE user_id = $1',
+        [user.id]
+      );
+      status = sellerStatus.rows[0]?.approval_status || null;
+    }
 
     const token = generateToken({ ...user, status });
 
@@ -117,11 +120,11 @@ const getProfile = async (req, res) => {
 
     if (user.role === 'seller') {
       const sellerResult = await query(
-        'SELECT status FROM seller_profiles WHERE user_id = $1',
+        'SELECT approval_status FROM seller_profiles WHERE user_id = $1',
         [user.id]
       );
       if (sellerResult.rows.length > 0) {
-        user.status = sellerResult.rows[0].status;
+        user.status = sellerResult.rows[0].approval_status;
       }
     }
 
