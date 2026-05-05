@@ -26,8 +26,8 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const userResult = await query(
-      'INSERT INTO users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role, status, created_at',
-      [name, email, hashedPassword, role]
+      'INSERT INTO users (name, email, password, role, status) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role, status, created_at',
+      [name, email, hashedPassword, role, 'active']
     );
     const user = userResult.rows[0];
 
