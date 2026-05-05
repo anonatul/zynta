@@ -4,6 +4,7 @@ dns.setDefaultResultOrder('ipv4first');
 const express = require('express');
 const cors = require('cors');
 const { query } = require('./config/db');
+const seed = require('./seed');
 
 const app = express();
 
@@ -31,6 +32,21 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/cart', require('./routes/cart'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/addresses', require('./routes/addresses'));
+
+// Seed endpoint (for seeding products - use once)
+app.post('/api/seed', async (req, res) => {
+  const { key } = req.body;
+  if (key !== process.env.SEED_KEY) {
+    return res.status(401).json({ message: 'Invalid key' });
+  }
+  try {
+    await seed();
+    res.json({ message: 'Seed completed' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Seed failed' });
+  }
+});
 
 app.use((err, req, res, next) => {
   console.error(err);
