@@ -10,7 +10,7 @@ function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('buyer');
+  const [role, setRole] = useState('customer');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -59,11 +59,11 @@ function Register() {
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <label style={{
                 flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem',
-                padding: '0.75rem 1rem', border: `2px solid ${role === 'buyer' ? 'var(--primary)' : 'var(--border-light)'}`,
+                padding: '0.75rem 1rem', border: `2px solid ${role === 'customer' ? 'var(--primary)' : 'var(--border-light)'}`,
                 borderRadius: 'var(--radius)', cursor: 'pointer', transition: 'var(--transition)',
-                background: role === 'buyer' ? 'var(--primary-soft)' : 'transparent'
+                background: role === 'customer' ? 'var(--primary-soft)' : 'transparent'
               }}>
-                <input type="radio" name="role" value="buyer" checked={role === 'buyer'} onChange={() => setRole('buyer')} style={{ width: 'auto' }} />
+                <input type="radio" name="role" value="customer" checked={role === 'customer'} onChange={() => setRole('customer')} style={{ width: 'auto' }} />
                 <div><strong style={{ fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: 6 }}><ShoppingBag size={15} /> Buyer</strong><p style={{ fontSize: '0.75rem', color: 'var(--fg-muted)', margin: 0 }}>Browse & purchase products</p></div>
               </label>
               <label style={{
