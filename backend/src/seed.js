@@ -77,8 +77,12 @@ const seed = async () => {
       [seller2Id, 'Urban Bazaar', '45 MG Road, Bengaluru', '+91-9988776655', 'approved']
     );
 
-    // Helper for placeholder images
-    const getImg = (id) => `https://picsum.photos/seed/${id}/400/400`;
+    // Helper for placeholder images - uses product title encoded
+    const getImg = (title, id) => {
+      const seed = (title || 'P') + id;
+      const hash = seed.split('').reduce((a,c) => ((a<<5)-a) + c.charCodeAt(0), 0);
+      return `https://placehold.co/400x400/7c3aed/ffffff?text=${(title||'Product').split(' ')[0]}`;
+    };
 
     // Clear existing products for clean re-seed
     await client.query('DELETE FROM products');
@@ -86,31 +90,31 @@ const seed = async () => {
     // Seed 50 products
     const products = [
       // ─── Electronics (10) ───
-      { title:'Sony WH-1000XM5',desc:'Premium noise-cancelling wireless headphones with 30hr battery life and multipoint connection',price:24990,stock:50,cat:'Electronics',img:getImg(1),seller:sellerId },
-      { title:'iPhone 15 Pro Max',desc:'A17 Pro chip, 48MP main camera, titanium design, USB-C',price:159900,stock:20,cat:'Electronics',img:getImg(2),seller:sellerId },
-      { title:'MacBook Air M3',desc:'13.6" Liquid Retina display, 18hr battery, fanless silent design',price:114900,stock:15,cat:'Electronics',img:getImg(3),seller:sellerId },
-      { title:'Samsung Galaxy Watch 6',desc:'Advanced health monitoring with BioActive sensor and sleep coaching',price:28999,stock:35,cat:'Electronics',img:getImg(4),seller:sellerId },
-      { title:'JBL Flip 6',desc:'Portable IP67 waterproof Bluetooth speaker with bold JBL Original Pro Sound',price:9999,stock:80,cat:'Electronics',img:getImg(5),seller:sellerId },
-      { title:'AirPods Pro 2',desc:'Active Noise Cancellation, Adaptive Transparency, personalized Spatial Audio',price:24900,stock:45,cat:'Electronics',img:getImg(6),seller:sellerId },
-      { title:'iPad Air M2',desc:'11" Liquid Retina, M2 chip, Apple Pencil Pro support',price:69900,stock:25,cat:'Electronics',img:getImg(7),seller:seller2Id },
-      { title:'Sony Alpha A7 IV',desc:'33MP full-frame mirrorless camera with real-time Eye AF',price:189990,stock:8,cat:'Electronics',img:getImg(8),seller:seller2Id },
-      { title:'Bose QuietComfort Ultra',desc:'Immersive spatial audio headphones with CustomTune technology',price:32900,stock:30,cat:'Electronics',img:getImg(9),seller:seller2Id },
-      { title:'DJI Mini 4 Pro',desc:'Sub-249g drone with 4K HDR video and omnidirectional obstacle sensing',price:79990,stock:10,cat:'Electronics',img:getImg(10),seller:seller2Id },
+      { title:'Sony WH-1000XM5',desc:'Premium noise-cancelling wireless headphones with 30hr battery life and multipoint connection',price:24990,stock:50,cat:'Electronics',img:getImg(p.title,1),seller:sellerId },
+      { title:'iPhone 15 Pro Max',desc:'A17 Pro chip, 48MP main camera, titanium design, USB-C',price:159900,stock:20,cat:'Electronics',img:getImg(p.title,2),seller:sellerId },
+      { title:'MacBook Air M3',desc:'13.6" Liquid Retina display, 18hr battery, fanless silent design',price:114900,stock:15,cat:'Electronics',img:getImg(p.title,3),seller:sellerId },
+      { title:'Samsung Galaxy Watch 6',desc:'Advanced health monitoring with BioActive sensor and sleep coaching',price:28999,stock:35,cat:'Electronics',img:getImg(p.title,4),seller:sellerId },
+      { title:'JBL Flip 6',desc:'Portable IP67 waterproof Bluetooth speaker with bold JBL Original Pro Sound',price:9999,stock:80,cat:'Electronics',img:getImg(p.title,5),seller:sellerId },
+      { title:'AirPods Pro 2',desc:'Active Noise Cancellation, Adaptive Transparency, personalized Spatial Audio',price:24900,stock:45,cat:'Electronics',img:getImg(p.title,6),seller:sellerId },
+      { title:'iPad Air M2',desc:'11" Liquid Retina, M2 chip, Apple Pencil Pro support',price:69900,stock:25,cat:'Electronics',img:getImg(p.title,7),seller:seller2Id },
+      { title:'Sony Alpha A7 IV',desc:'33MP full-frame mirrorless camera with real-time Eye AF',price:189990,stock:8,cat:'Electronics',img:getImg(p.title,8),seller:seller2Id },
+      { title:'Bose QuietComfort Ultra',desc:'Immersive spatial audio headphones with CustomTune technology',price:32900,stock:30,cat:'Electronics',img:getImg(p.title,9),seller:seller2Id },
+      { title:'DJI Mini 4 Pro',desc:'Sub-249g drone with 4K HDR video and omnidirectional obstacle sensing',price:79990,stock:10,cat:'Electronics',img:getImg(p.title,10),seller:seller2Id },
 
       // ─── Clothing (8) ───
-      { title:'Nike Air Max 270',desc:'Lifestyle sneaker with the tallest Max Air unit for all-day comfort',price:12995,stock:60,cat:'Clothing',img:getImg(11),seller:sellerId },
-      { title:'Levi\'s 501 Original',desc:'The iconic straight-fit jeans in premium selvedge denim',price:4999,stock:100,cat:'Clothing',img:getImg(12),seller:sellerId },
-      { title:'Uniqlo Ultra Light Down',desc:'Ultra-lightweight packable down jacket — weighs just 230g',price:3990,stock:45,cat:'Clothing',img:getImg(13),seller:sellerId },
-      { title:'Ray-Ban Aviator Classic',desc:'Iconic aviator sunglasses with polarized G-15 green lenses',price:8490,stock:70,cat:'Clothing',img:getImg(14),seller:sellerId },
-      { title:'Adidas Ultraboost 23',desc:'Responsive Boost cushioning with Primeknit+ upper',price:16999,stock:40,cat:'Clothing',img:getImg(15),seller:seller2Id },
-      { title:'North Face Puffer Jacket',desc:'700-fill goose down insulation with DWR finish',price:18999,stock:20,cat:'Clothing',img:getImg(16),seller:seller2Id },
-      { title:'Carhartt WIP Beanie',desc:'Rib-knit acrylic watch hat in classic Carhartt style',price:1999,stock:120,cat:'Clothing',img:getImg(17),seller:seller2Id },
-      { title:'Herschel Classic Backpack',desc:'Signature striped fabric liner with 24L capacity',price:4499,stock:55,cat:'Clothing',img:getImg(18),seller:seller2Id },
+      { title:'Nike Air Max 270',desc:'Lifestyle sneaker with the tallest Max Air unit for all-day comfort',price:12995,stock:60,cat:'Clothing',img:getImg(p.title,11),seller:sellerId },
+      { title:'Levi\'s 501 Original',desc:'The iconic straight-fit jeans in premium selvedge denim',price:4999,stock:100,cat:'Clothing',img:getImg(p.title,12),seller:sellerId },
+      { title:'Uniqlo Ultra Light Down',desc:'Ultra-lightweight packable down jacket — weighs just 230g',price:3990,stock:45,cat:'Clothing',img:getImg(p.title,13),seller:sellerId },
+      { title:'Ray-Ban Aviator Classic',desc:'Iconic aviator sunglasses with polarized G-15 green lenses',price:8490,stock:70,cat:'Clothing',img:getImg(p.title,14),seller:sellerId },
+      { title:'Adidas Ultraboost 23',desc:'Responsive Boost cushioning with Primeknit+ upper',price:16999,stock:40,cat:'Clothing',img:getImg(p.title,15),seller:seller2Id },
+      { title:'North Face Puffer Jacket',desc:'700-fill goose down insulation with DWR finish',price:18999,stock:20,cat:'Clothing',img:getImg(p.title,16),seller:seller2Id },
+      { title:'Carhartt WIP Beanie',desc:'Rib-knit acrylic watch hat in classic Carhartt style',price:1999,stock:120,cat:'Clothing',img:getImg(p.title,17),seller:seller2Id },
+      { title:'Herschel Classic Backpack',desc:'Signature striped fabric liner with 24L capacity',price:4499,stock:55,cat:'Clothing',img:getImg(p.title,18),seller:seller2Id },
 
       // ─── Books (6) ───
-      { title:'Atomic Habits',desc:'James Clear — Tiny changes, remarkable results. #1 NYT bestseller',price:499,stock:200,cat:'Books',img:getImg(19),seller:sellerId },
-      { title:'The Psychology of Money',desc:'Morgan Housel — Timeless lessons on wealth, greed, and happiness',price:399,stock:150,cat:'Books',img:getImg(20),seller:sellerId },
-      { title:'Deep Work',desc:'Cal Newport — Rules for focused success in a distracted world',price:449,stock:120,cat:'Books',img:getImg(21),seller:sellerId },
+      { title:'Atomic Habits',desc:'James Clear — Tiny changes, remarkable results. #1 NYT bestseller',price:499,stock:200,cat:'Books',img:getImg(p.title,19),seller:sellerId },
+      { title:'The Psychology of Money',desc:'Morgan Housel — Timeless lessons on wealth, greed, and happiness',price:399,stock:150,cat:'Books',img:getImg(p.title,20),seller:sellerId },
+      { title:'Deep Work',desc:'Cal Newport — Rules for focused success in a distracted world',price:449,stock:120,cat:'Books',img:getImg(p.title,21),seller:sellerId },
       { title:'Sapiens',desc:'Yuval Noah Harari — A brief history of humankind',price:599,stock:180,cat:'Books',img:'getImg1495446815901-a7297e633e8d?w=600&q=80',seller:seller2Id },
       { title:'Thinking, Fast and Slow',desc:'Daniel Kahneman — Nobel laureate\'s exploration of two thinking systems',price:549,stock:90,cat:'Books',img:'getImg1497633762265-9d179a990aa6?w=600&q=80',seller:seller2Id },
       { title:'The Alchemist',desc:'Paulo Coelho — A fable about following your dream. 150M+ copies sold',price:299,stock:250,cat:'Books',img:'getImg1543002588-bfa74002ed7e?w=600&q=80',seller:seller2Id },
